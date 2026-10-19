@@ -43,7 +43,7 @@ dotnet build -c Release
 dotnet test -c Release
 ```
 
-The tool is then `src\WinDlgGen\bin\Release\net10.0\WinDlgGen.exe`.
+The tool is then `out\bin\WinDlgGen\Release\WinDlgGen.exe`.
 
 Currently, the tool just reads XML files and writes Win32 resource files, and has
 dependencies on the Windows GUI subsystem itself.  It does run on Linux also.
