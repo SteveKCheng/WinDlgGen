@@ -28,3 +28,7 @@ dotnet test -c Release
 ```
 
 The tool is then `src\WinDlgGen\bin\Release\net10.0-windows\WinDlgGen.exe`.
+
+## Licence
+
+MIT; see [LICENSE.txt](LICENSE.txt).
