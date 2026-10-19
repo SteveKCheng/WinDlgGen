@@ -150,7 +150,8 @@ dialogs:
 | One line of label text | height 8 |
 
 A one-line label (8 high) centred beside an edit box (14 high) is moved 3
-down, which lines up the baselines of the two texts.
+down, which lines up the two texts. Centring does not line up text in every
+case; see [Planned: aligning text baselines](#planned-aligning-text-baselines).
 
 ## What it does not do
 
@@ -164,3 +165,111 @@ down, which lines up the baselines of the two texts.
   meant to be resized.
 - **Grids.** Columns of labels line up when the labels have the same
   `width`.
+- **Align baselines.** See the next section.
+
+## Planned: aligning text baselines
+
+Not implemented yet. This section is the design for when a dialog needs
+it.
+
+### The problem
+
+In a row of controls, the text of each one should be on the same line. A
+horizontal stack centres its children by default, and for the usual row
+that does it:
+
+| Beside a 14-high edit box, combo box or button | Offset from centring |
+|---|---|
+| One-line label (8 high) | (14 − 8) / 2 = 3 |
+| Check box or radio button (10 high), whose text is 1 down inside it | (14 − 10) / 2 = 2, so its text is at 3 |
+
+3 is the offset that Microsoft's guidelines give for a label beside a text
+box. Centring goes wrong in two cases:
+
+- **A label of two or more lines beside a one-line control.** Centring
+  puts the middle of the label level with the middle of the control, but
+  its first line should be level with the control's text.
+- **A one-line label beside a taller control**, such as a list box or a
+  multi-line edit box. The label should be level with the first line at the
+  top of the control, not halfway down it. (Beside a trackbar, which has no
+  text, centring is what is wanted.)
+
+The workaround until this is implemented is to place the label by hand:
+`alignSelf="start" margin="3 0 0 0"`.
+
+### The design
+
+As in CSS's `align-items: baseline`, a new alignment value `baseline` for
+the `align` of an `hstack` and for `alignSelf`. Each node may have a
+**first-line offset** `b(c)`: the distance from the top of its border box
+to the top of its first line of text.
+
+| Node | `b(c)` |
+|---|---|
+| Label | 0 |
+| Check box, radio button | 1 |
+| Edit box (one line or multi-line), combo box, button | 3 |
+| List box | about 1, to be checked |
+| Trackbar, spacer, `<control>` | none |
+| `hstack` aligned by baseline | its top padding + `above` (below) |
+| `vstack` | its top padding + the top margin and `b` of its first child, if that has one |
+| Group box, other `hstack` | none |
+
+A control could also take a `baseline` attribute to set or override
+`b(c)`, for a `<control>` of a class the table does not know.
+
+In an `hstack` aligned by baseline, the **participants** are the children
+whose alignment is `baseline` and that have a first-line offset. They are
+placed so that their first lines are level, and the rest are placed by
+their own `alignSelf`, or at the start. In the notation of the formulas
+above, where *across* is vertical for an `hstack`, and with `top(M)` and
+`bottom(M)` the top and bottom margins:
+
+```
+    above  = max over participants of (top(M(c)) + b(c))
+    below  = max over participants of (height(m(c)) - b(c) + bottom(M(c)))
+
+    measure:
+        across = vertical(P) + max(above + below,
+                                   max over the others of (height(m(c)) + vertical(M(c))))
+
+    arrange, for a participant:
+        top of border box = top of C + above - b(c)
+```
+
+If the stack is taller than it needs to be, the participants stay at the
+top. `baseline` in a `vstack` is an error, as there is no row to line up.
+
+Checking against the cases above:
+
+- Label (8 high, `b` 0) beside an edit box (14, 3): `above` = 3,
+  `below` = max(8, 11) = 11, so the row is 14 high, with the label at 3 and
+  the edit box at 0. This is the same as centring.
+- A two-line label (16 high) beside it: `below` = max(16, 11) = 16, so the
+  row is 19 high, with the label still at 3 and the edit box at 0.
+- A check box (10, 1) beside an edit box: the check box is at 3 − 1 = 2, as
+  with centring.
+
+### Implementing it
+
+- `Alignment.Baseline`, accepted by the reader for an `hstack`'s `align` and
+  for `alignSelf`, with an error for a `vstack` or group.
+- A first-line offset on each node, set by `Layout.Measure` from the table,
+  and the formulas above in the measure and arrange passes of an `hstack`.
+- Tests: the three cases above; a nested `hstack`, whose own offset lets it
+  line up with its siblings; a participant with margins; a trackbar beside
+  labels, which is not a participant.
+
+Whether `baseline` should then become the default `align` of an `hstack`
+can be decided once it has been tried. It gives the same result as centring
+for one-line labels and controls, but a row with a trackbar would need
+`align="center"` written out.
+
+### Pixels
+
+No layout in dialog units can promise baselines exact to the pixel. Windows
+converts each control's rectangle to pixels separately, rounding each
+coordinate, and each control then places its own text in pixels. At 150%,
+texts that are level in dialog units can be a pixel apart. The offsets in
+the table are what the guidelines imply; only rendering the dialog can
+check them, and those marked "to be checked" have not been.
