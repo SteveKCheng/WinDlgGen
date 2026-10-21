@@ -36,11 +36,15 @@ Options:
   --version               Show version information
 ```
 
-Example:
+**Example**:
 
 ```
 WinDlgGen -i preamble.h -o dialogs.rc options.xml login.xml
 ```
+
+As with most other build tools, the file is unconditionally written even if the contents
+are unchanged, so that timestamp of the output file gets updated on success.  
+If there is any error in the input, the output file is untouched.
 
 ## Documentation
 

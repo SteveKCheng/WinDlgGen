@@ -100,14 +100,14 @@ static int Run(IEnumerable<string> inputFilePaths, string? outputFilePath, strin
         return 1;
 
     var bytes = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false).GetBytes(writer.ToString());
-    return WriteFileChecked(outputFilePath, bytes);
+    return WriteOutputFile(outputFilePath, bytes);
 }
 
 //
 // Write output
 //
 
-static int WriteFileChecked(string? outputFilePath, ReadOnlySpan<byte> bytes)
+static int WriteOutputFile(string? outputFilePath, ReadOnlySpan<byte> bytes)
 {
     // The output is UTF-8 without a byte order mark, as the #pragma code_page
     // at its start declares.
@@ -118,12 +118,9 @@ static int WriteFileChecked(string? outputFilePath, ReadOnlySpan<byte> bytes)
         return 0;
     }
 
-    // Leave an unchanged file alone, so that its timestamp does not make the
-    // resource compiler run again.
     try
     {
-        if (!File.Exists(outputFilePath) || !File.ReadAllBytes(outputFilePath).AsSpan().SequenceEqual(bytes))
-            File.WriteAllBytes(outputFilePath, bytes);
+        File.WriteAllBytes(outputFilePath, bytes);
     }
     catch (Exception e) when (e is IOException or UnauthorizedAccessException)
     {
