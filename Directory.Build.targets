@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- Deliberately left empty so MSBuild on this project does not use the parent
+       directory's Direction.Build.targets file, when this project is included
+       in the source tree as a Git submodule. -->
+</Project>
