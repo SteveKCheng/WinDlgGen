@@ -10,7 +10,7 @@ using WinDlgGen;
 Argument<FileInfo[]> inputXmlArgs = new("input")
 {
     Description = "XML input file",
-    Arity = ArgumentArity.OneOrMore
+    Arity = ArgumentArity.OneOrMore,
 };
 
 Option<FileInfo> outputFileOpt = new("--output", "-o")
@@ -18,10 +18,16 @@ Option<FileInfo> outputFileOpt = new("--output", "-o")
     Description = "RC file to write to; if not specified, writes to stdout"
 };
 
+Option<FileInfo> includeFileOpt = new("--include", "-i")
+{
+    Description = "Text file containing definitions to be inserted into output"
+};
+
 RootCommand rootCommand =
     new("Lays out the dialogs described by the XML files, and writes them as DIALOGEX resources. ")
     {
         outputFileOpt,
+        includeFileOpt,
         inputXmlArgs,
     };
 
@@ -29,7 +35,8 @@ rootCommand.SetAction(parseResult =>
 {
     var inputFilePaths = parseResult.GetValue(inputXmlArgs)!.Select(f => f.FullName);
     var outputFilePath = parseResult.GetValue(outputFileOpt)?.FullName;
-    return Run(inputFilePaths, outputFilePath);
+    var includeFilePath = parseResult.GetValue(includeFileOpt)?.FullName;
+    return Run(inputFilePaths, outputFilePath, includeFilePath);
 });
 
 var parseResult = rootCommand.Parse(args);
@@ -46,10 +53,23 @@ return parseResult.Invoke();
 // Start of processing
 //
 
-static int Run(IEnumerable<string> inputFilePaths, string? outputFilePath)
+static int Run(IEnumerable<string> inputFilePaths, string? outputFilePath, string? includeFilePath)
 {
     var diagnostics = new DiagnosticBag();
     var writer = new RcWriter(diagnostics);
+
+    if (includeFilePath is not null)
+    {
+        try
+        {
+            using var includeFileReader = File.OpenText(includeFilePath);
+            writer.CopyVerbatim(includeFileReader, Path.GetFileName(includeFilePath));
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            diagnostics.Error(DiagnosticCodes.FileError, new SourceLocation(includeFilePath, 0, 0), e.Message);
+        }
+    }
 
     foreach (var input in inputFilePaths)
     {

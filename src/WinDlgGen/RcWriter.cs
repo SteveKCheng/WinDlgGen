@@ -33,6 +33,27 @@ public sealed class RcWriter
     }
 
     /// <summary>
+    /// Copy text from an external source into the output at the current location. 
+    /// </summary>
+    /// <param name="reader">
+    /// Provides the text (file) to append.  It will be re-encoded into the output. 
+    /// </param>
+    /// <param name="comment">
+    /// Comment on the textual inclusion that will be inserted into the output.
+    /// </param>
+    public void CopyVerbatim(TextReader reader, string comment)
+    {
+        Line($"// BEGIN file inclusion: {comment}");
+        Line();
+        
+        while (reader.ReadLine() is { } line)
+            Line(line);
+        
+        Line();
+        Line($"// END file inclusion: {comment}");
+    }
+
+    /// <summary>
     /// Appends one dialog.
     /// </summary>
     /// <param name="dialog">A dialog that <see cref="Layout.Run"/> has laid

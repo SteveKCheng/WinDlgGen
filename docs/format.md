@@ -157,10 +157,19 @@ that ends up with no width or height is an error.
 
 `WinDlgGen -o dialogs.rc a.xml b.xml` writes one `DIALOGEX` resource per
 input file, and leaves `dialogs.rc` untouched if it would not change. The
-file is UTF-8, and starts with `#pragma code_page(65001)`. It is meant to be
-included from the project's main `.rc` file, which must include
-`resource.h` (or wherever the identifiers are defined) and `commctrl.h`
-before it. `winres.h` defines `IDC_STATIC`.
+file is UTF-8, and starts with `#pragma code_page(65001)`. 
+
+The option `-i` may be used to paste in whether definitions are needed 
+for the output `.rc` file to compile.  Typically the following files need to
+be the target of `#include` directives inside the file named by option `-i`:
+
+  - `winres.h` (from the Windows SDK; defines `IDC_STATIC`)
+  - `commctrl.h` (if the dialog resource uses common controls)
+  - `resource.h` (defined by the program that uses the dialog resource).
+
+Currently, WinDlgGen does not parse the definitions in the file `-i`,
+but just inserts their contents.  A future version might read the definitions
+to be able to display a preview of the dialog.
 
 Every control is written as a `CONTROL` statement with all its style flags
 spelled out. The resource compiler's shorthand statements, such as `LTEXT`

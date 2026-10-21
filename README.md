@@ -24,7 +24,22 @@ of a Web site dynamically, then WinDlgGen is a *static site generator*.
 ## Usage
 
 ```
-WinDlgGen -o dialogs.rc options.xml login.xml
+WinDlgGen [options] ‹input›…
+
+Arguments:
+  ‹input›                 XML input file(s)
+
+Options:
+  -i, --include ‹include› Text file holding defeinitions to be inserted into output
+  -o, --output ‹output›   RC file to write to; if not specified, writes to stdout
+  --help                  Show help and usage information
+  --version               Show version information
+```
+
+Example:
+
+```
+WinDlgGen -i preamble.h -o dialogs.rc options.xml login.xml
 ```
 
 ## Documentation
