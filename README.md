@@ -30,7 +30,7 @@ Arguments:
   ‹input›                 XML input file(s)
 
 Options:
-  -i, --include ‹include› Text file holding defeinitions to be inserted into output
+  -i, --include ‹include› Text file holding definitions to be inserted into output
   -o, --output ‹output›   RC file to write to; if not specified, writes to stdout
   --help                  Show help and usage information
   --version               Show version information
@@ -64,7 +64,7 @@ dotnet test -c Release
 
 The tool is then `out\bin\WinDlgGen\Release\WinDlgGen.exe`.
 
-Currently, the tool just reads XML files and writes Win32 resource files, and has
+Currently, the tool just reads XML files and writes Win32 resource files, and has no
 dependencies on the Windows GUI subsystem itself.  It does run on Linux also.
 
 ## License

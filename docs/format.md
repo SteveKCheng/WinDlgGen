@@ -156,10 +156,9 @@ that ends up with no width or height is an error.
 ## The output
 
 `WinDlgGen -o dialogs.rc a.xml b.xml` writes one `DIALOGEX` resource per
-input file, and leaves `dialogs.rc` untouched if it would not change. The
-file is UTF-8, and starts with `#pragma code_page(65001)`. 
+input file. The file is UTF-8, and starts with `#pragma code_page(65001)`. 
 
-The option `-i` may be used to paste in whether definitions are needed 
+The option `-i` may be used to paste in whatever definitions are needed 
 for the output `.rc` file to compile.  Typically the following files need to
 be the target of `#include` directives inside the file named by option `-i`:
 
